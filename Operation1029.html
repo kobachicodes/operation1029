@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation 1029</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+    overflow: hidden;
+    transition: background 2s ease;
+  }
+
+  h1 {
+    font-size: 3em;
+    color: #ff4081;
+    text-shadow: 2px 2px #ff9aaa;
+    animation: glow 2s ease-in-out infinite alternate;
+    z-index: 20;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 10px #ff5a9e; }
+    to { text-shadow: 0 0 25px #ff80bf; }
+  }
+
+  button {
+    background: #333;
+    border: none;
+    padding: 15px 35px;
+    color: white;
+    font-size: 1.2em;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, background 0.3s ease;
+    z-index: 25;
+  }
+
+  button:hover {
+    background: #555;
+    transform: scale(1.05);
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .message {
+    display: none;
+    text-align: center;
+    color: #ff4081;
+    margin-top: 25px;
+    font-size: 1.5em;
+    animation: fadeIn 2s ease forwards;
+    z-index: 20;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .surprise-bg {
+    background: linear-gradient(135deg, #ffb6c1, #ffd1dc, #fff0f5);
+    transition: background 2s ease;
+  }
+
+  /* 🎂 Birthday cake image */
+  .cake-bg {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    opacity: 0;
+    z-index: 5;
+    animation: fadeInCake 3s ease forwards;
+    filter: drop-shadow(0 0 10px rgba(255, 182, 193, 0.6));
+  }
+
+  @keyframes fadeInCake {
+    from { opacity: 0; transform: translateX(-50%) translateY(50px); }
+    to { opacity: 0.25; transform: translateX(-50%) translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<h1 id="title" class="hidden">💐 Happy Birthday, Mamayey! 💐</h1>
+<button id="pressBtn" onclick="startSurprise()">Press</button>
+
+<div class="message" id="message">
+  <p>🎂 Happy Birthday, Mamayey! 🎉<br>
+  You’re the heart of our home and we always miss you!<br>
+  Thank you for always doing your best!<br>
+  Thank you for providing us with things we want and need!<br>
+  We love you endlessly! 💕</p>
+</div>
+
+<!-- 🎂 Cake image (fades in behind message) -->
+<img id="cake" class="cake-bg hidden" src="https://cdn.pixabay.com/photo/2017/02/01/22/02/birthday-2032978_1280.png" alt="Birthday Cake">
+
+<audio id="song" src="https://cdn.pixabay.com/download/audio/2023/03/01/audio_2a4c3f2ffb.mp3?filename=happy-birthday-jazz-13759.mp3"></audio>
+
+<script>
+const body = document.body;
+const btn = document.getElementById('pressBtn');
+const title = document.getElementById('title');
+const message = document.getElementById('message');
+const song = document.getElementById('song');
+const cake = document.getElementById('cake');
+const confetti = document.getElementById('confetti');
+const ctx = confetti.getContext('2d');
+confetti.width = window.innerWidth;
+confetti.height = window.innerHeight;
+
+const pieces = [];
+const numPieces = 150;
+for (let i = 0; i < numPieces; i++) {
+  pieces.push({
+    x: Math.random() * confetti.width,
+    y: Math.random() * confetti.height - confetti.height,
+    size: Math.random() * 8 + 5,
+    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+    speed: Math.random() * 3 + 2
+  });
+}
+
+function startSurprise() {
+  btn.classList.add('hidden');
+  body.classList.add('surprise-bg');
+  title.classList.remove('hidden');
+  message.style.display = 'block';
+  cake.classList.remove('hidden');
+  song.play();
+  startConfetti();
+}
+
+function startConfetti() {
+  function draw() {
+    ctx.clearRect(0, 0, confetti.width, confetti.height);
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+  }
+
+  function update() {
+    pieces.forEach(p => {
+      p.y += p.speed;
+      if (p.y > confetti.height) {
+        p.y = -10;
+        p.x = Math.random() * confetti.width;
+      }
+    });
+  }
+
+  function loop() {
+    draw();
+    update();
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+}
+
+window.addEventListener('resize', () => {
+  confetti.width = window.innerWidth;
+  confetti.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
+

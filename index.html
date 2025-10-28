@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Operation 1029</title>
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     margin: 0;
     padding: 0;
@@ -19,11 +23,30 @@
     transition: background 2s ease;
   }
 
+  button {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 30;
+  }
+
+  button:hover {
+    background: #444;
+    transform: scale(1.05);
+  }
+
   h1 {
     font-size: 3em;
     color: #ff4081;
     text-shadow: 2px 2px #ff9aaa;
     animation: glow 2s ease-in-out infinite alternate;
+    opacity: 0;
+    transition: opacity 1.5s ease;
     z-index: 20;
   }
 
@@ -32,41 +55,24 @@
     to { text-shadow: 0 0 25px #ff80bf; }
   }
 
-  button {
-    background: #333;
-    border: none;
-    padding: 15px 35px;
-    color: white;
-    font-size: 1.2em;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, background 0.3s ease;
-    z-index: 25;
-  }
-
-  button:hover {
-    background: #555;
-    transform: scale(1.05);
-  }
-
-  .hidden {
-    display: none;
-  }
-
   .message {
     display: none;
+    max-width: 80%;
     text-align: center;
     color: #ff4081;
-    margin-top: 25px;
-    font-size: 1.5em;
-    animation: fadeIn 2s ease forwards;
+    font-size: 1.3em;
+    margin-top: 20px;
+    line-height: 1.6;
     z-index: 20;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .typing {
+    border-right: 3px solid #ff4081;
+    animation: blink 0.8s infinite;
+  }
+
+  @keyframes blink {
+    50% { border-color: transparent; }
   }
 
   canvas {
@@ -78,46 +84,42 @@
   }
 
   .surprise-bg {
-    background: linear-gradient(135deg, #ffb6c1, #ffd1dc, #fff0f5);
-    transition: background 2s ease;
+    background: linear-gradient(135deg, #ffc0cb, #ffe6f0, #fff0f5);
   }
 
-  /* 🎂 Birthday cake image */
+  /* Floating cake */
   .cake-bg {
     position: fixed;
-    bottom: 0;
+    bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
-    width: 400px;
+    width: 350px;
     opacity: 0;
     z-index: 5;
-    animation: fadeInCake 3s ease forwards;
-    filter: drop-shadow(0 0 10px rgba(255, 182, 193, 0.6));
+    filter: drop-shadow(0 0 15px rgba(255,182,193,0.7));
+    animation: floatCake 3s ease-in-out infinite alternate;
   }
 
-  @keyframes fadeInCake {
-    from { opacity: 0; transform: translateX(-50%) translateY(50px); }
-    to { opacity: 0.25; transform: translateX(-50%) translateY(0); }
+  @keyframes floatCake {
+    from { transform: translateX(-50%) translateY(0); }
+    to { transform: translateX(-50%) translateY(-15px); }
+  }
+
+  .fade-in {
+    opacity: 1 !important;
+    transition: opacity 2s ease;
   }
 </style>
 </head>
 <body>
 
 <canvas id="confetti"></canvas>
+<button id="pressBtn" onclick="startSurprise()">Press Me 🎁</button>
+<h1 id="title">💐 Happy Birthday, Mamayey! 💐</h1>
 
-<h1 id="title" class="hidden">💐 Happy Birthday, Mamayey! 💐</h1>
-<button id="pressBtn" onclick="startSurprise()">Press</button>
+<img id="cake" class="cake-bg" src="https://cdn.pixabay.com/photo/2017/02/01/22/02/birthday-2032978_1280.png" alt="Birthday Cake">
 
-<div class="message" id="message">
-  <p>🎂 Happy Birthday, Mamayey! 🎉<br>
-  You’re the heart of our home and we always miss you!<br>
-  Thank you for always doing your best!<br>
-  Thank you for providing us with things we want and need!<br>
-  We love you endlessly! 💕</p>
-</div>
-
-<!-- 🎂 Cake image (fades in behind message) -->
-<img id="cake" class="cake-bg hidden" src="https://cdn.pixabay.com/photo/2017/02/01/22/02/birthday-2032978_1280.png" alt="Birthday Cake">
+<div class="message" id="message"></div>
 
 <audio id="song" src="https://cdn.pixabay.com/download/audio/2023/03/01/audio_2a4c3f2ffb.mp3?filename=happy-birthday-jazz-13759.mp3"></audio>
 
@@ -133,6 +135,7 @@ const ctx = confetti.getContext('2d');
 confetti.width = window.innerWidth;
 confetti.height = window.innerHeight;
 
+// Confetti setup
 const pieces = [];
 const numPieces = 150;
 for (let i = 0; i < numPieces; i++) {
@@ -146,13 +149,32 @@ for (let i = 0; i < numPieces; i++) {
 }
 
 function startSurprise() {
-  btn.classList.add('hidden');
+  btn.style.display = 'none';
   body.classList.add('surprise-bg');
-  title.classList.remove('hidden');
-  message.style.display = 'block';
-  cake.classList.remove('hidden');
+  title.classList.add('fade-in');
+  cake.style.opacity = '0.25';
   song.play();
   startConfetti();
+  setTimeout(() => showMessage(), 2000);
+}
+
+// Typewriter effect
+const msgText = `🎂 Happy Birthday, Mamayey! 🎉
+You’re the heart of our home and we always miss you.
+Thank you for always doing your best and providing us with all we want and need.
+We love you endlessly! 💕`;
+
+let i = 0;
+function showMessage() {
+  message.style.display = 'block';
+  message.classList.add('typing');
+  const interval = setInterval(() => {
+    message.textContent = msgText.slice(0, i++);
+    if (i > msgText.length) {
+      clearInterval(interval);
+      message.classList.remove('typing');
+    }
+  }, 40);
 }
 
 function startConfetti() {
@@ -181,7 +203,6 @@ function startConfetti() {
     update();
     requestAnimationFrame(loop);
   }
-
   loop();
 }
 
@@ -192,5 +213,6 @@ window.addEventListener('resize', () => {
 </script>
 </body>
 </html>
+
 
 
